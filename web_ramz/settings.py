@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.product_catalog',
     'apps.review',
+    'apps.order',
     'drf_spectacular',
 
 ]
