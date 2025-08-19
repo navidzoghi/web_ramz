@@ -80,9 +80,13 @@ WSGI_APPLICATION = 'web_ramz.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "web_ramz",
+        "USER": "postgres",
+        "PASSWORD": "navid9126494",
+        "HOST": "127.0.0.1",
+        "PORT": 5432,
     }
 }
 
@@ -141,4 +145,42 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Awesome API documentation",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # Keep default Django loggers
+
+    'formatters': {
+        'simple': {
+            'format': '[{levelname}] {asctime} {name} - {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',  # Change to INFO or WARNING in production
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Or DEBUG if you want more verbosity
+            'propagate': False,
+        },
+        # Optional: log your own app logs
+        'myapp': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    }
 }

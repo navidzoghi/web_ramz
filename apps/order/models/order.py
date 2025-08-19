@@ -17,7 +17,7 @@ class OrderStatus(models.TextChoices):
 class Order(AbstractModel):
     status = models.CharField(max_length=15,choices=OrderStatus.choices,default=OrderStatus.PENDING)
     total_price = models.DecimalField(max_digits=20,decimal_places=2,default=0)
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='orders')
 
     def __str__(self):
         return f"Order #{self.id} - {self.status}"

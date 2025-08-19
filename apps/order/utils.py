@@ -5,9 +5,9 @@ from apps.order.models.order import Order, OrderItem
 from apps.product_catalog.models import Product
 
 
-def process_order(order_items):
+def process_order(order_items,user=None):
     with transaction.atomic():
-        order = Order.objects.create()
+        order = Order.objects.create(user=user)
         total_price = 0  # Renamed for clarity
 
         for item in order_items:
