@@ -2,6 +2,7 @@ from django.db.models import Avg, Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
+from apps.core.permissons import IsAdminOrReadOnly
 from apps.product_catalog.filters import ProductFilter
 from apps.product_catalog.models import Product, Tag
 from apps.product_catalog.apis.v1.serializers.product import ProductSerializer
@@ -11,6 +12,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter
+    permission_classes = [IsAdminOrReadOnly]
     lookup_field = 'slug'
     def get_queryset(self):
         # Prefetch only active tags using custom Prefetch queryset

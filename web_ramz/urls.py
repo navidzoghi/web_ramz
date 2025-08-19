@@ -30,5 +30,6 @@ urlpatterns = [
 
     # Redoc UI
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    path('api/product-catalog', include('apps.product_catalog.urls','product_catalog'), name='product_catalog'),
+    path('api/product-catalog/', include('apps.product_catalog.urls','product_catalog'), name='product_catalog'),
+    path('api/review/', include('apps.review.urls','review'), name='review'),
 ]

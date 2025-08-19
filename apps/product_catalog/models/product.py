@@ -35,5 +35,18 @@ class Product(AbstractModel):
     )
     tags = models.ManyToManyField(Tag, blank=True)
     slug = models.SlugField(max_length=50, unique=True)
+    rating_sum = models.BigIntegerField(default=0, editable=False)
+    rating_count = models.PositiveIntegerField(default=0, editable=False)
     def __str__(self):
         return self.name
+
+    @property
+    def average_rating(self):
+        """Calculated property based on incremental counters"""
+        if self.rating_count == 0:
+            return 0.00
+        average = round(self.rating_sum / self.rating_count, 2)
+        if average < 0 or average > 5:
+            raise ValueError("Rating must be between 0 and 5")
+        return average
+
