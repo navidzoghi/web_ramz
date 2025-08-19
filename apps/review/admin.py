@@ -15,7 +15,7 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('product', 'rating', 'created_at', 'truncated_comment')
     list_filter = ('rating', 'created_at')
     search_fields = ('product__name', 'comment')
-    readonly_fields = ('created_at',)
+    readonly_fields = ('created_at',"uuid")
     date_hierarchy = 'created_at'
 
     def truncated_comment(self, obj):
