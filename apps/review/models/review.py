@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
+from django.db.models import F
 
 from apps.core.models import AbstractModel
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -41,13 +42,42 @@ class Review(AbstractModel):
     def __str__(self):
         return f"Review for {self.product.name} ({self.rating})"
 
-    def save(self, *args, **kwargs):
-        """Handle approval status changes"""
-        if self.pk:  # Existing review being updated
-            old = Review.objects.get(pk=self.pk)
-            if old.approved != self.approved:
-                super().save(*args, **kwargs)
-                self.product.update_rating_cache()
-                return
+    def update_product_rating(self, old_rating=None):
+        """Atomically update product rating counters"""
+        with transaction.atomic():
+            # Lock the product row
+            product = Product.objects.active().select_for_update().get(pk=self.product_id)
 
-        super().save(*args, **kwargs)
+            # Handle different update scenarios
+            if not self.is_active and self.is_deleted:  # Review deleted
+                if self.approved:
+                    Product.objects.filter(pk=product.pk).update(
+                        rating_sum=F('rating_sum') - self.rating,
+                        rating_count=F('rating_count') - 1
+                    )
+
+            elif self.approved:
+                if old_rating is not None:  # Rating update
+                    rating_delta = self.rating - old_rating
+                    Product.objects.filter(pk=product.pk).update(
+                        rating_sum=F('rating_sum') + rating_delta
+                    )
+                else:  # New approved review
+                    Product.objects.filter(pk=product.pk).update(
+                        rating_sum=F('rating_sum') + self.rating,
+                        rating_count=F('rating_count') + 1
+                    )
+
+            elif old_rating is not None and self.pk:  # Approval status change
+                # Was approved, now unapproved
+                if Review.objects.filter(pk=self.pk, is_approved=True).exists():
+                    Product.objects.filter(pk=product.pk).update(
+                        rating_sum=F('rating_sum') - self.rating,
+                        rating_count=F('rating_count') - 1
+                    )
+                # Was unapproved, now approved
+                elif self.approved:
+                    Product.objects.filter(pk=product.pk).update(
+                        rating_sum=F('rating_sum') + self.rating,
+                        rating_count=F('rating_count') + 1
+                    )
